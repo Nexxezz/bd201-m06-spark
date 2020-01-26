@@ -12,7 +12,7 @@ object BatchReader {
       .master("yarn")
       .getOrCreate()
 
-    val hotelsWeather: DataFrame = ss.read.format("kafka")
+    val df: DataFrame = ss.read.format("kafka")
       .option("kafka.bootstrap.servers", "sandbox-hdp.hortonworks.com:6667")
       .option("kafka.value.deserializer", "spark.serdes.HotelWeatherDeserializer")
       .option("kafka.key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
@@ -23,14 +23,14 @@ object BatchReader {
       .load()
 
     import ss.sqlContext.implicits._
-    val rdd = hotelsWeather.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
+    val rdd = df.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
 
     val expedia: DataFrame = ss
       .read.format("com.databricks.spark.avro")
       .load("/tmp/dataset/expedia")
 
     expedia.printSchema()
-    hotelsWeather.printSchema()
+    df.printSchema()
 
     ss.close()
   }
