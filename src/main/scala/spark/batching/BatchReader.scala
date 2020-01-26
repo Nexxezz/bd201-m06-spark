@@ -22,6 +22,8 @@ object BatchReader {
       .option("maxOffsetsPerTrigger", "1")
       .load()
 
+    import ss.sqlContext.implicits._
+
     val rdd = df.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
 
     val expedia: DataFrame = ss
