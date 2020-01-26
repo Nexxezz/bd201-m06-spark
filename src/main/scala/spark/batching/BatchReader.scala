@@ -1,6 +1,7 @@
 package spark.batching
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import spark.data.HotelWeather
 
 object BatchReader {
 
@@ -11,7 +12,7 @@ object BatchReader {
       .master("yarn")
       .getOrCreate()
 
-    val hotels_weather = ss.read.format("kafka")
+    val hotelsWeather: DataFrame = ss.read.format("kafka")
       .option("kafka.bootstrap.servers", "sandbox-hdp.hortonworks.com:6667")
       .option("kafka.value.deserializer", "spark.serdes.HotelWeatherDeserializer")
       .option("kafka.key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
@@ -21,12 +22,16 @@ object BatchReader {
       .option("maxOffsetsPerTrigger", "1")
       .load()
 
+    import ss.sqlContext.implicits._
+    val rdd = hotelsWeather.map(row => HotelWeather.of(new String(row.getAs[Array[Byte]]("value"))))
+    //    val zz = hotelsWeather.map(_.getAs[String]("value"))
+
     val expedia: DataFrame = ss
       .read.format("com.databricks.spark.avro")
       .load("/tmp/dataset/expedia")
 
     expedia.printSchema()
-    hotels_weather.printSchema()
+    hotelsWeather.printSchema()
 
     ss.close()
   }
