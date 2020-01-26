@@ -22,16 +22,17 @@ object BatchReader {
       .option("maxOffsetsPerTrigger", "1")
       .load()
 
-    import ss.sqlContext.implicits._
     val rdd = df.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
 
     val expedia: DataFrame = ss
       .read.format("com.databricks.spark.avro")
       .load("/tmp/dataset/expedia")
 
+    val join_expedia_hotels_weather =rdd.join(expedia,rdd("hotelId")===expedia("hotel_id"),"inner")
+
     expedia.printSchema()
     df.printSchema()
-
+    join_expedia_hotels_weather.printSchema()
     ss.close()
   }
 }
