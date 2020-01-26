@@ -1,8 +1,11 @@
 package spark.batching
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
+
 object BatchReader {
-  def main(args:Array[String]) = {
+
+  def main(args: Array[String]): Unit = {
+
     val ss = SparkSession.builder()
       .appName("spark-batching-app")
       .master("local[*]")
@@ -18,9 +21,13 @@ object BatchReader {
       .option("maxOffsetsPerTrigger", "1")
       .load()
 
-    val expedia = ss.read.format("com.databricks.spark.avro").load("/tmp/dataset/expedia")
+    val expedia: DataFrame = ss
+      .read.format("com.databricks.spark.avro")
+      .load("/tmp/dataset/expedia")
 
     expedia.printSchema()
     hotels_weather.printSchema()
+
+    ss.close()
   }
 }
