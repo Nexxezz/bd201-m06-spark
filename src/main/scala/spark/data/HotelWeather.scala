@@ -24,6 +24,8 @@ object HotelWeather {
 
   def of(str: String): HotelWeather = {
     val arr = str.split(COMMA)
-    new HotelWeather(arr(0).toLong, arr(1), arr(2).toDouble, arr(3).toDouble, arr(4))
+    HotelWeather(arr(0).toLong, arr(1), arr(2).toDouble, arr(3).toDouble, arr(4))
   }
+
+  def of(bytes: Array[Byte]): HotelWeather = of(new String(bytes))
 }

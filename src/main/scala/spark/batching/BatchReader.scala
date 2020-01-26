@@ -23,8 +23,7 @@ object BatchReader {
       .load()
 
     import ss.sqlContext.implicits._
-    val rdd = hotelsWeather.map(row => HotelWeather.of(new String(row.getAs[Array[Byte]]("value"))))
-    //    val zz = hotelsWeather.map(_.getAs[String]("value"))
+    val rdd = hotelsWeather.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
 
     val expedia: DataFrame = ss
       .read.format("com.databricks.spark.avro")
