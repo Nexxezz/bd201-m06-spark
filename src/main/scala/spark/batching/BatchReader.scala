@@ -8,7 +8,7 @@ object BatchReader {
 
     val ss = SparkSession.builder()
       .appName("spark-batching-app")
-      .master("local[*]")
+      .master("yarn")
       .getOrCreate()
 
     val hotels_weather = ss.read.format("kafka")
