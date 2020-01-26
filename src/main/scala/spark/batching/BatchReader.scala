@@ -1,6 +1,6 @@
 package spark.batching
 
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import spark.data.HotelWeather
 
 object BatchReader {
@@ -14,8 +14,6 @@ object BatchReader {
 
     val df: DataFrame = ss.read.format("kafka")
       .option("kafka.bootstrap.servers", "sandbox-hdp.hortonworks.com:6667")
-      .option("kafka.value.deserializer", "spark.serdes.HotelWeatherDeserializer")
-      .option("kafka.key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
       .option("subscribe", "join-result-topic")
       .option("startingOffsets", "earliest")
       .option("endingOffsets", "latest")
@@ -24,17 +22,16 @@ object BatchReader {
 
     import ss.sqlContext.implicits._
 
-    val rdd = df.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
-
+    val dataset = df.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
     val expedia: DataFrame = ss
       .read.format("com.databricks.spark.avro")
       .load("/tmp/dataset/expedia")
 
-    val join_expedia_hotels_weather =rdd.join(expedia,rdd("hotelId")===expedia("hotel_id"),"inner")
+    val joinExpediaHotelsWeather = dataset.join(expedia,dataset("hotelId")===expedia("hotel_id"),"inner")
 
     expedia.printSchema()
     df.printSchema()
-    join_expedia_hotels_weather.printSchema()
+    joinExpediaHotelsWeather.printSchema()
     ss.close()
   }
 }
