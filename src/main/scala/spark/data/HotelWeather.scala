@@ -8,7 +8,7 @@ case class HotelWeather(hotelId: Long,
 
 
   override def toString: String =
-    hotelId.toString + HotelWeather.COMMA +
+    hotelId + HotelWeather.COMMA +
       hotelName + HotelWeather.COMMA +
       averageTemperatureFahrenheit.toString + HotelWeather.COMMA +
       averageTemperatureCelsius.toString + HotelWeather.COMMA +
