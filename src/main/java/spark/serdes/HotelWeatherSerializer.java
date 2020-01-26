@@ -1,7 +1,7 @@
 package spark.serdes;
 
-import spark.data.HotelWeather;
 import org.apache.kafka.common.serialization.Serializer;
+import spark.data.HotelWeather;
 
 import java.util.Map;
 
