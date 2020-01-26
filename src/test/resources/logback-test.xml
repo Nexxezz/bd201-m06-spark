@@ -9,7 +9,7 @@
         </layout>
     </appender>
 
-    <logger name="kafka-app-test" level="debug" additivity="false">
+    <logger name="spark-app-test" level="debug" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 
