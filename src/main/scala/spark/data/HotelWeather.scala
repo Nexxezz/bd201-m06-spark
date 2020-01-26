@@ -8,7 +8,7 @@ case class HotelWeather(hotelId: Long,
 
 
   override def toString: String =
-    hotelId.toString + HotelWeather.COMMA +
+    hotelId + HotelWeather.COMMA +
       hotelName + HotelWeather.COMMA +
       averageTemperatureFahrenheit.toString + HotelWeather.COMMA +
       averageTemperatureCelsius.toString + HotelWeather.COMMA +
@@ -24,6 +24,8 @@ object HotelWeather {
 
   def of(str: String): HotelWeather = {
     val arr = str.split(COMMA)
-    new HotelWeather(arr(0).toLong, arr(1), arr(2).toDouble, arr(3).toDouble, arr(4))
+    HotelWeather(arr(0).toLong, arr(1), arr(2).toDouble, arr(3).toDouble, arr(4))
   }
+
+  def of(bytes: Array[Byte]): HotelWeather = of(new String(bytes))
 }
