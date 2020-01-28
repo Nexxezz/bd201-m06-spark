@@ -9,11 +9,11 @@
         </layout>
     </appender>
 
-    <logger name="spark-app-test" level="debug" additivity="false">
+    <logger name="spark-app-test" level="error" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 
-    <root level="error">
+    <root level="info">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
