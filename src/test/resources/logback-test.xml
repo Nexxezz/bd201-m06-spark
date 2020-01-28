@@ -9,7 +9,8 @@
         </layout>
     </appender>
 
-    <logger name="spark-app-test" level="error" additivity="false">
+    <logger name="spark-app-test" level="error
+" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 
