@@ -7,7 +7,7 @@
      * execute spark application with spark-submnit:  
      ```spark-submit --class spark.batching.BatchReader /  
      /home/201bd/md06-spark/bd201-md06-spark-1.0.0-SNAPSHOT-jar-with-dependencies.jar /  
-     --deploy-mode cluster```
+     --deploy-mode cluster ```
 * Read Expedia data from HDFS with Spark.  
 * Calculate idle days (days betweeen current and previous check in dates) for every hotel.  
 * Validate data:  
