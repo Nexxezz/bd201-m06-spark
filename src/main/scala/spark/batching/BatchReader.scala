@@ -36,7 +36,7 @@ object BatchReader {
 
     val hotelsWeather = hotelsWeatherFromKafka.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
 
-    //Read Expedia data from HDFS with Spark
+    // Read Expedia data from HDFS with Spark
     val expedia: DataFrame = ss
       .read.format("com.databricks.spark.avro")
       .load("/tmp/dataset/expedia")
@@ -44,19 +44,19 @@ object BatchReader {
     if (expedia.count() > 0)
       LOG.info("Successfully read expedia data from HDFS")
 
-    //Calculate idle days (days between current and previous check in dates) for every hotel.
+    // Calculate idle days (days between current and previous check in dates) for every hotel
     val expediaWithIdleDays = expedia.withColumn("idleDays", datediff(expedia("srch_co"), expedia("srch_ci")))
 
 
 
-    //Remove all booking data for hotels with at least one "invalid" row (with idle days more than or equal to 2 and less than 30)
+    // Remove all booking data for hotels with at least one "invalid" row (with idle days more than or equal to 2 and less than 30)
     val expediaFiltered = expedia.filter(datediff(expedia("srch_co"), expedia("srch_ci")) >= 2 || datediff(expedia("srch_co"), expedia("srch_ci")) <= 30)
 
-    //Print hotels info (name, address, country etc) of "invalid" hotels and make a screenshot. Join expedia and hotel data for this purpose
+    // Print hotels info (name, address, country etc) of "invalid" hotels and make a screenshot. Join expedia and hotel data for this purpose
     val hotelsWeatherExpedia = hotelsWeather.join(expedia, hotelsWeather("hotelId") === expedia("hotel_id"), "inner")
     hotelsWeatherExpedia.show(5)
 
-    //Store "valid" Expedia data in HDFS partitioned by year of "srch_ci"
+    // Store "valid" Expedia data in HDFS partitioned by year of "srch_ci"
     expediaFiltered.write
       .partitionBy("srch_ci")
       .format("com.databricks.spark.avro")
