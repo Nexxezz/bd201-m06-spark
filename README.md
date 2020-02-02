@@ -1,4 +1,4 @@
-# bd201-m06-spark  
+# bd201-m06-spark-batching
 * Read hotels&weather data from Kafka with Spark application in a batch manner (by specifying start offsets and batch limit in configuration file).  
     * build project:  
      ```mvn clean package```  
@@ -20,4 +20,14 @@
     * view saved expedia data partitioned by srch_ci:  
     ```hdfs dfs -ls /tmp/expedia_batch_result```  
 
-
+# bd201-m06-spark-streaming
+* Read Expedia data for 2016 year from HDFS as initial state DataFrame. Read data for 2017 year as streaming data  
+    * see comments in StreamReader clazz
+* Enrich both DataFrames with weather: add average day temperature at checkin (join with hotels+weaher data from Kafka topic)  
+    * see comments in StreamReader clazz
+* Filter incoming data by having average temperature more than 0 Celsius degrees.  
+    * see comments in StreamReader clazz
+* Calculate customer's duration of stay as days between requested check-in and check-out date.
+    * see comments in StreamReader clazz
+* Store final data in HDFS
+    * see comments in StreamReader clazz

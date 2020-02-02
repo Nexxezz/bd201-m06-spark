@@ -2,7 +2,7 @@ package spark.data
 
 import spark.data.HotelWeather.COMMA
 
-case class HotelWeather(hotelId: Long,
+case class HotelWeather(hotel_id: Long,
                         hotelName: String,
                         averageTemperatureFahrenheit: Double,
                         averageTemperatureCelsius: Double,
@@ -10,13 +10,13 @@ case class HotelWeather(hotelId: Long,
 
 
   override def toString: String =
-    hotelId + COMMA +
+    hotel_id + COMMA +
       hotelName + COMMA +
       averageTemperatureFahrenheit + COMMA +
       averageTemperatureCelsius + COMMA +
-      weatherDate;
+      weatherDate
 
-  def isEmpty: Boolean = hotelId == 0L
+  def isEmpty: Boolean = hotel_id == 0L
 }
 
 object HotelWeather {
