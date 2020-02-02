@@ -30,7 +30,5 @@
     * see comments in StreamReader clazz
 * Filter incoming data by having average temperature more than 0 Celsius degrees.  
     * see comments in StreamReader clazz
-* Calculate customer's duration of stay as days between requested check-in and check-out date.
-    * see comments in StreamReader clazz
 * Store final data in HDFS
     * see comments in StreamReader clazz
