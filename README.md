@@ -5,9 +5,9 @@
      * copy jar to hdp container:  
      ```docker cp bd201-md06-spark-1.0.0-SNAPSHOT-jar-with-dependencies.jar sandbox-hdp:/home/201bd/md06-spark/```  
      * execute spark application with spark-submnit:  
-     ``` spark-submit --class spark.batching.BatchReader /  
-     /home/201bd/md06-spark/bd201-md06-spark-1.0.0-SNAPSHOT-jar-with-dependencies.jar /  
-     --deploy-mode cluster ```
+     ```spark-submit --class spark.batching.BatchReader  
+     /home/201bd/md06-spark/bd201-md06-spark-1.0.0-SNAPSHOT-jar-with-dependencies.jar  
+     --deploy-mode cluster```
 * Read Expedia data from HDFS with Spark.
     * see comments in BatchReader class
 * Calculate idle days (days betweeen current and previous check in dates) for every hotel.  
