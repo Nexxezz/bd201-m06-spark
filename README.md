@@ -5,9 +5,9 @@
      * copy jar to hdp container:  
      ```docker cp bd201-md06-spark-1.0.0-SNAPSHOT-jar-with-dependencies.jar sandbox-hdp:/home/201bd/md06-spark/```  
      * execute spark application with spark-submnit:  
-     ``` spark-submit --class spark.batching.BatchReader /  
-     /home/201bd/md06-spark/bd201-md06-spark-1.0.0-SNAPSHOT-jar-with-dependencies.jar /  
-     --deploy-mode cluster ```
+     ```spark-submit --class spark.batching.BatchReader  
+     /home/201bd/md06-spark/bd201-md06-spark-1.0.0-SNAPSHOT-jar-with-dependencies.jar  
+     --deploy-mode cluster```
 * Read Expedia data from HDFS with Spark.
     * see comments in BatchReader class
 * Calculate idle days (days betweeen current and previous check in dates) for every hotel.  
@@ -29,8 +29,6 @@
 * Enrich both DataFrames with weather: add average day temperature at checkin (join with hotels+weaher data from Kafka topic)  
     * see comments in StreamReader clazz
 * Filter incoming data by having average temperature more than 0 Celsius degrees.  
-    * see comments in StreamReader clazz
-* Calculate customer's duration of stay as days between requested check-in and check-out date.
     * see comments in StreamReader clazz
 * Store final data in HDFS
     * see comments in StreamReader clazz
