@@ -22,7 +22,7 @@ object BatchReader {
     //Read hotels&weather data from Kafka with Spark application in a batch manner by specifying start offsets and batch limit in configuration file
     val hotelsWeatherFromKafka: DataFrame = ss.read.format("kafka")
       .option("kafka.bootstrap.servers", "sandbox-hdp.hortonworks.com:6667")
-      .option("subscribe", "join-result-topic")
+      .option("subscribe", "hotels-weather-topic")
       .option("startingOffsets", "earliest")
       .option("endingOffsets", "latest")
       .load()
@@ -33,13 +33,12 @@ object BatchReader {
       LOG.info("HotelsWeather data from topic successfully read")
 
     import ss.sqlContext.implicits._
-
     val hotelsWeather = hotelsWeatherFromKafka.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
 
     // Read Expedia data from HDFS with Spark
     val expedia: DataFrame = ss
       .read.format("com.databricks.spark.avro")
-      .load("/tmp/dataset/expedia")
+      .load("/tmp/201bd/dataset/expedia")
 
     if (expedia.count() > 0)
       LOG.info("Successfully read expedia data from HDFS")
@@ -53,7 +52,7 @@ object BatchReader {
     val expediaFiltered = expedia.filter(datediff(expedia("srch_co"), expedia("srch_ci")) >= 2 || datediff(expedia("srch_co"), expedia("srch_ci")) <= 30)
 
     // Print hotels info (name, address, country etc) of "invalid" hotels and make a screenshot. Join expedia and hotel data for this purpose
-    val hotelsWeatherExpedia = hotelsWeather.join(expedia, hotelsWeather("hotelId") === expedia("hotel_id"), "inner")
+    val hotelsWeatherExpedia = hotelsWeather.join(expedia, hotelsWeather("hotel_id") === expedia("hotel_id"), "inner")
     hotelsWeatherExpedia.show(5)
 
     // Store "valid" Expedia data in HDFS partitioned by year of "srch_ci"
@@ -61,7 +60,7 @@ object BatchReader {
       .partitionBy("srch_ci")
       .format("com.databricks.spark.avro")
       .mode("overwrite")
-      .save("hdfs://sandbox-hdp.hortonworks.com:8020/tmp/expedia_batch_result/")
+      .save("hdfs://sandbox-hdp.hortonworks.com:8020/tmp/201bd/dataset/expedia_valid_data/")
 
    // Group the remaining data and print bookings counts: 1) by hotel country, 2) by hotel city. Make screenshots of the outputs
     val countryCount = expediaFiltered.groupBy("user_location_country").count()

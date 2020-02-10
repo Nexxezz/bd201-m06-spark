@@ -84,6 +84,14 @@
             <artifactId>kafka-clients</artifactId>
             <version>2.4.0</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.elasticsearch/elasticsearch-spark -->
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch-spark_2.11</artifactId>
+            <version>2.4.5</version>
+        </dependency>
+
     </dependencies>
 
     <build>
