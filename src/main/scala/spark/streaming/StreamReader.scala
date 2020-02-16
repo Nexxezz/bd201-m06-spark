@@ -1,11 +1,13 @@
 package spark.streaming
 
+import com.typesafe.scalalogging.Logger
 import org.apache.spark.sql.functions.{col, datediff, when}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import spark.data.HotelWeather
 
 object StreamReader {
 
+  private val LOG = Logger(getClass)
 
   def main(args: Array[String]): Unit = {
 
@@ -22,6 +24,8 @@ object StreamReader {
       .option("subscribe", "hotels-weather-topic")
       .load()
 
+    LOG.info("Readed hotels-weather data from Kafka")
+
     import ss.sqlContext.implicits._
     val hotelsWeather = hotelsWeatherFromKafka.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
 
@@ -32,6 +36,7 @@ object StreamReader {
       .format("com.databricks.spark.avro")
       .load("/tmp/201bd/dataset/expedia_valid_data/srch_ci=2016*")
 
+    LOG.info("Readed expedia-2016 data from HDFS:" + "downloaded " + expediaInitialStateDataframe.count + " records")
 
     //Read data for 2017 year as streaming data
     val expediaStream = ss.readStream
@@ -39,12 +44,16 @@ object StreamReader {
       .schema(expediaInitialStateDataframe.schema)
       .load("/tmp/201bd/dataset/expedia_valid_data/srch_ci=2017*")
 
+    LOG.info("Readed expedia-2017 data from HDFS")
+
+
     //Enrich both DataFrames with weather: add average day temperature at checkin (join with hotels+weaher data from Kafka topic)
     val joinResult = expediaStream.join(hotelsWeather, "hotel_id")
 
     //Filter incoming data by having average temperature more than 0 Celsius degrees
     //Calculate customer's duration of stay as days between requested check-in and check-out date
     val filtered = joinResult.filter("avg_temp_c >= 0").withColumn("duration_of_stay", datediff(joinResult("srch_co"), joinResult("srch_ci")))
+
 
     //Create customer preferences of stay time based on next logic
     val result = filtered.withColumn("stay_type",
