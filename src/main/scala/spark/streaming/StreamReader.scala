@@ -1,15 +1,48 @@
 package spark.streaming
 
-import org.apache.spark.sql.functions.{datediff, when, col}
+import biz.paluch.logging.gelf.log4j.GelfLogAppender
+import org.apache.log4j.Logger
+import org.apache.spark.sql.functions.{col, datediff, when}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import spark.data.HotelWeather
 
+
 object StreamReader {
 
-  def main(args: Array[String]): Unit = {
-    val ss = SparkSession.builder().appName("spark-streaming-app").master("yarn").getOrCreate()
-    ss.sparkContext.setLogLevel("error")
+  def createGelfLogAppender(): GelfLogAppender = {
+    val appender = new GelfLogAppender()
+    appender.setHost("sandbox-hdp.hortonworks.com")
+    appender.setPort(9600)
+    appender.setExtractStackTrace("true")
+    appender.setFilterStackTrace(false)
+    appender.setMaximumMessageSize(8192)
+    appender.setIncludeFullMdc(true)
+    appender.activateOptions()
 
+    appender
+  }
+
+  def main(args: Array[String]): Unit = {
+    val ss = SparkSession
+      .builder()
+      .appName("spark-streaming")
+      .master("yarn")
+      .getOrCreate()
+
+    val rootLogger = Logger.getRootLogger
+    rootLogger.addAppender(createGelfLogAppender())
+
+
+    val hotelsWeatherFromKafka: DataFrame = ss.readStream
+      .format("kafka")
+      .option("kafka.bootstrap.servers", "sandbox-hdp.hortonworks.com:6667")
+      .option("subscribe", "hotels-weather-topic")
+      .load()
+
+    import ss.sqlContext.implicits._
+    val hotelsWeather = hotelsWeatherFromKafka.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
+
+    hotelsWeather.writeStream.format("parquet").option("path", "/tmp/valid_kafka_hotels_weather/").option("checkpointLocation", "/tmp/kafka/2").start()
     //Read Expedia data for 2016 year from HDFS as initial state DataFrame
     val expediaInitialStateDataframe: DataFrame = ss
       .read
@@ -18,23 +51,10 @@ object StreamReader {
 
 
     //Read data for 2017 year as streaming data
-    val expediaStream = ss
-      .readStream
+    val expediaStream = ss.readStream
       .format("com.databricks.spark.avro")
       .schema(expediaInitialStateDataframe.schema)
       .load("/tmp/201bd/dataset/expedia_valid_data/")
-
-    val hotelsWeatherFromKafka: DataFrame = ss.read.format("kafka")
-      .option("kafka.bootstrap.servers", "sandbox-hdp.hortonworks.com:6667")
-      .option("subscribe", "hotels-weather-topic")
-      .option("startingOffsets", "earliest")
-      .option("endingOffsets", "latest")
-      .option("spark.es.port", "9200")
-      .option("spark.es.nodes", "172.18.0.5")
-      .load()
-
-    import ss.sqlContext.implicits._
-    val hotelsWeather = hotelsWeatherFromKafka.map(row => HotelWeather.of(row.getAs[Array[Byte]]("value")))
 
     //Enrich both DataFrames with weather: add average day temperature at checkin (join with hotels+weaher data from Kafka topic)
     val joinResult = expediaStream.join(hotelsWeather, "hotel_id")
@@ -50,10 +70,9 @@ object StreamReader {
         .when(col("duration_of_stay") > 14 || col("duration_of_stay") <= 28, "long_stay")
         .otherwise("null"))
 
-
-    import org.elasticsearch.spark.sql._
-    result.toDF().saveToEs(("weather-expedia-hotels/result"))
-
-
+    result.writeStream.format("console").start()
+    result.writeStream.format("org.elasticsearch.spark.sql")
+      .option("checkpointLocation", "/tmp/check/15")
+      .start("spark/weather-expedia-hotels")
   }
 }
